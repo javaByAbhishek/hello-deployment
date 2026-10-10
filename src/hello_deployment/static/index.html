@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello Deployment</title>
+  </head>
+  <body>
+    <h1>Hello Deployment</h1>
+    <button id="call-api">Call API</button>
+    <p id="response">Click the button to call the backend.</p>
+
+    <script>
+      document.querySelector("#call-api").addEventListener("click", async () => {
+        const responseElement = document.querySelector("#response");
+        responseElement.textContent = "Calling API...";
+
+        try {
+          const response = await fetch("/api/hello");
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          responseElement.textContent = data.message;
+        } catch (error) {
+          responseElement.textContent = `Request failed: ${error.message}`;
+        }
+      });
+    </script>
+  </body>
+</html>
