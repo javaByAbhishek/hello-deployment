@@ -7,21 +7,47 @@
   </head>
   <body>
     <h1>Hello Deployment</h1>
-    <button id="call-api">Call API</button>
-    <p id="response">Click the button to call the backend.</p>
+
+    <label for="prompt">Prompt for Gemini</label>
+    <br>
+    <textarea id="prompt" rows="4" cols="50" maxlength="1000"
+      placeholder="Ask Gemini something..."></textarea>
+    <br>
+    <button id="send-prompt">Send prompt</button>
+    <p id="response">Enter a prompt and click Send prompt.</p>
 
     <script>
-      document.querySelector("#call-api").addEventListener("click", async () => {
+      document.querySelector("#send-prompt").addEventListener("click", async () => {
+        const promptElement = document.querySelector("#prompt");
         const responseElement = document.querySelector("#response");
-        responseElement.textContent = "Calling API...";
+        const button = document.querySelector("#send-prompt");
+        const prompt = promptElement.value.trim();
+
+        if (!prompt) {
+          responseElement.textContent = "Enter a prompt first.";
+          return;
+        }
+
+        button.disabled = true;
+        responseElement.textContent = "Waiting for Gemini...";
 
         try {
-          const response = await fetch("/api/hello");
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const response = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          });
+
           const data = await response.json();
-          responseElement.textContent = data.message;
+          if (!response.ok) {
+            throw new Error(data.detail || `HTTP ${response.status}`);
+          }
+
+          responseElement.textContent = data.response;
         } catch (error) {
           responseElement.textContent = `Request failed: ${error.message}`;
+        } finally {
+          button.disabled = false;
         }
       });
     </script>
